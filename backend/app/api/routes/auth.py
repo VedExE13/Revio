@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
+from fastapi.security import OAuth2PasswordRequestForm
 
 from app.db.database import get_db
 from app.schemas.user import UserCreate
@@ -21,10 +22,14 @@ def register(
 
 @router.post("/login",status_code=status.HTTP_200_OK,response_model=Token)
 def login(
-    user_data: UserLogin,
+    form_data: OAuth2PasswordRequestForm = Depends(),
     db: Session = Depends(get_db),
     
 ):
+    user_data = UserLogin(
+    email=form_data.username,
+    password=form_data.password,
+)
     user = authenticate_user(db,user_data,)
     access_token = create_access_token(
         data={

@@ -2,6 +2,7 @@ from passlib.context import CryptContext
 from datetime import datetime, timedelta, timezone
 from jose import jwt
 from fastapi import HTTPException
+from fastapi.security import OAuth2PasswordBearer
 
 from app.core.config import settings
 pwd_context = CryptContext(
@@ -67,3 +68,7 @@ def decode_access_token(
             status_code=401,
             detail="Invalid or expired token",
         )
+    
+oauth2_scheme = OAuth2PasswordBearer(
+    tokenUrl="/api/v1/login",
+)
