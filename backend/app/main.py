@@ -37,8 +37,9 @@ app.include_router(
     tags=["Users"],
 )
 
+
 app.include_router(
     reviews_router,
     prefix="/api/v1",
-    tags=["Reviews"],
+    tags=["Reviews"]
 )
