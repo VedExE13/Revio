@@ -5,6 +5,8 @@ from fastapi import HTTPException
 from app.models.review import Review
 from app.models.user import User
 from app.schemas.review import ReviewCreate
+from app.schemas.review import ReviewUpdate
+
 
 def create_review(
         db: Session,
@@ -47,4 +49,36 @@ def get_review(
             status_code=404,
             detail="Review not found",
         )
+    return review
+
+def update_review(
+        db: Session,
+        id: int,
+        review_data: ReviewUpdate,
+        current_user: User
+
+):
+    review = (
+        db.query(Review)
+        .filter(Review.id == id)
+        .first()
+    )
+    if not review:
+        raise HTTPException(
+            status_code=404,
+            detail="Review not found",
+    ) 
+    if review.user_id != current_user.id:
+        raise HTTPException(
+            status_code=403,
+            detail="You cannot edit this review"
+    )
+    review.title = review_data.title
+    review.rating = review_data.rating
+    review.feedback = review_data.feedback
+    db.commit()
+    db.refresh(review)
+
+
+  
     return review
