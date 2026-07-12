@@ -82,3 +82,31 @@ def update_review(
 
   
     return review
+
+def delete_review(
+    db: Session,
+    review_id: int,
+    current_user: User,
+):
+    review = (
+        db.query(Review)
+        .filter(Review.id == review_id)
+        .first()
+
+    )
+    if not review:
+        raise HTTPException(
+            status_code=404,
+            detail="Review not found",
+    ) 
+    if review.user_id != current_user.id:
+        raise HTTPException(
+            status_code=403,
+            detail="You cannot delete this review"
+    )
+    db.delete(review)
+    db.commit()
+
+    return {
+        "message": "Review deleted succesfully"
+    }

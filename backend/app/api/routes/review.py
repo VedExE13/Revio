@@ -7,10 +7,12 @@ from app.services.auth_services import get_current_user
 from app.schemas.review import ReviewResponse
 from app.schemas.review import ReviewCreate
 from app.schemas.review import ReviewUpdate
+from app.schemas.review import MessageResponse
 from app.services.review_services import create_review
 from app.services.review_services import get_reviews
 from app.services.review_services import get_review
 from app.services.review_services import update_review
+from app.services.review_services import delete_review
 
 
 router = APIRouter()
@@ -45,3 +47,16 @@ def update_review_route(
 
 ):
     return update_review(db,review_id,review_data,current_user,)
+
+@router.delete("/reviews/{review_id}",response_model=MessageResponse)
+def delete_review_route(
+    review_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+    
+):
+    return delete_review(
+        db=db,
+        review_id=review_id,
+        current_user=current_user,
+)
