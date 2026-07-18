@@ -13,6 +13,8 @@ from app.services.review_services import get_reviews
 from app.services.review_services import get_review
 from app.services.review_services import update_review
 from app.services.review_services import delete_review
+from app.services.review_services import get_my_review
+
 
 
 router = APIRouter()
@@ -27,9 +29,13 @@ def create_review_route(
 
 @router.get("/reviews",response_model=list[ReviewResponse])
 def get_reviews_route(
-    db: Session = Depends(get_db)
+    skip: int = 0,
+    limit: int = 10,
+    search: str | None = None,
+    db: Session = Depends(get_db),
+    
 ):
-    return get_reviews(db)
+    return get_reviews(db = db,skip= skip,limit=limit,search=search)
 
 @router.get("/reviews/{id}",response_model=ReviewResponse)
 def get_review_route(
@@ -60,3 +66,10 @@ def delete_review_route(
         review_id=review_id,
         current_user=current_user,
 )
+
+@router.get("/me/reviews",response_model=list[ReviewResponse])
+def get_my_review_route(
+    current_user: User = Depends(get_current_user),
+    db:Session = Depends(get_db)
+):
+    return get_my_review(current_user = current_user,db = db)

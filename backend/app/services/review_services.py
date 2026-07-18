@@ -26,10 +26,20 @@ def create_review(
     return review
 
 def get_reviews(
-    db: Session
+    db: Session,
+    skip: int = 0,
+    limit: int = 10,
+    search: str | None = None,
 ):
+    query = db.query(Review)
+    if search:
+        query = query.filter(
+            Review.title.ilike(f"%{search}%")
+        )
     reviews = (
-    db.query(Review)
+    query
+    .offset(skip)
+    .limit(limit)
     .all()
 )
 
@@ -110,3 +120,14 @@ def delete_review(
     return {
         "message": "Review deleted succesfully"
     }
+
+def get_my_review(
+        db: Session,
+        current_user: User,
+):
+    reviews = (
+        db.query(Review)
+        .filter(Review.user_id == current_user.id)
+        .all()
+    )
+    return reviews
