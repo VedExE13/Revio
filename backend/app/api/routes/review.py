@@ -8,13 +8,15 @@ from app.schemas.review import ReviewResponse
 from app.schemas.review import ReviewCreate
 from app.schemas.review import ReviewUpdate
 from app.schemas.review import MessageResponse
+from app.schemas.review import SortOption
+from app.schemas.review import ReviewStatsResponse
 from app.services.review_services import create_review
 from app.services.review_services import get_reviews
 from app.services.review_services import get_review
 from app.services.review_services import update_review
 from app.services.review_services import delete_review
 from app.services.review_services import get_my_review
-
+from app.services.review_services import get_review_stats
 
 
 router = APIRouter()
@@ -32,10 +34,17 @@ def get_reviews_route(
     skip: int = 0,
     limit: int = 10,
     search: str | None = None,
+    sort: SortOption |None = None,
     db: Session = Depends(get_db),
     
 ):
-    return get_reviews(db = db,skip= skip,limit=limit,search=search)
+    return get_reviews(db = db,skip= skip,limit=limit,search=search,sort=sort)
+
+@router.get("/reviews/stats",response_model=ReviewStatsResponse)
+def get_review_stats_route(
+    db: Session = Depends(get_db)
+):
+    return get_review_stats(db=db)
 
 @router.get("/reviews/{id}",response_model=ReviewResponse)
 def get_review_route(
@@ -73,3 +82,4 @@ def get_my_review_route(
     db:Session = Depends(get_db)
 ):
     return get_my_review(current_user = current_user,db = db)
+

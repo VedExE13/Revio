@@ -1,11 +1,14 @@
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 from fastapi import HTTPException
-
+from decimal import Decimal
 
 from app.models.review import Review
 from app.models.user import User
 from app.schemas.review import ReviewCreate
 from app.schemas.review import ReviewUpdate
+from app.schemas.review import SortOption
+
 
 
 def create_review(
@@ -22,7 +25,7 @@ def create_review(
 
     db.add(review)
     db.commit()
-    db.refresh(review)
+    db.refresh(review) 
     return review
 
 def get_reviews(
@@ -30,12 +33,22 @@ def get_reviews(
     skip: int = 0,
     limit: int = 10,
     search: str | None = None,
+    sort: SortOption | None = None,
 ):
     query = db.query(Review)
     if search:
         query = query.filter(
             Review.title.ilike(f"%{search}%")
         )
+    if sort == SortOption.newest:
+        query = query.order_by(
+            Review.created_at.desc()
+        )
+    elif sort == SortOption.oldest:
+        query = query.order_by(
+            Review.created_at.asc()
+        )
+        
     reviews = (
     query
     .offset(skip)
@@ -131,3 +144,23 @@ def get_my_review(
         .all()
     )
     return reviews
+
+def get_review_stats(
+    db: Session,
+):
+    review_stats = (
+        db.query(
+            func.count(Review.id).label("total_reviews"),
+            func.avg(Review.rating).label("average_rating"),
+            func.max(Review.rating).label("highest_rating"),
+            func.min(Review.rating).label("lowest_rating"),
+        )
+        .first()
+    )
+
+    return {
+        "total_reviews": review_stats.total_reviews,
+        "average_rating": round(float(review_stats.average_rating or 0),2),
+        "highest_rating": review_stats.highest_rating or 0,
+        "lowest_rating": review_stats.lowest_rating or 0,
+    }

@@ -1,6 +1,7 @@
 from pydantic import BaseModel, Field, ConfigDict
 from datetime import datetime
-
+from enum import Enum
+from decimal import Decimal
 
 class ReviewCreate(BaseModel):
     title: str = Field(min_length = 2,max_length = 255)
@@ -26,3 +27,13 @@ class ReviewUpdate(BaseModel):
 
 class MessageResponse(BaseModel):
     message: str
+
+class SortOption(str,Enum):
+    newest = "newest"
+    oldest = "oldest"
+
+class ReviewStatsResponse(BaseModel):
+    total_reviews: int
+    average_rating: Decimal
+    highest_rating: int
+    lowest_rating: int
