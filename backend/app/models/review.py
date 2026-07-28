@@ -1,9 +1,16 @@
+from __future__ import annotations
 from sqlalchemy import DateTime, String,Text,ForeignKey,Integer
 from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import relationship
 from datetime import datetime
+
 
 from app.db.base import Base
 
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from app.models.user import User
 
 class Review(Base):
     __tablename__ = "reviews"
@@ -21,6 +28,10 @@ class Review(Base):
     ForeignKey("users.id"),
     nullable=False,
     index=True,
+)
+    
+    user: Mapped["User"] = relationship(
+    back_populates="reviews"
 )
 
     title: Mapped[str] = mapped_column(

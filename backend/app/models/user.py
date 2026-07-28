@@ -1,10 +1,16 @@
-
+from __future__ import annotations
 from sqlalchemy import DateTime, String
 from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import relationship
+
 from datetime import datetime
 
 from app.db.base import Base
 
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from app.models.review import Review
 
 class User(Base):
     __tablename__ = "users"
@@ -30,4 +36,9 @@ class User(Base):
         DateTime,
         default=datetime.utcnow,
         onupdate=datetime.utcnow,
+    )
+
+    reviews: Mapped[list["Review"]] = relationship(
+    back_populates="user",
+    cascade="all, delete-orphan",
     )

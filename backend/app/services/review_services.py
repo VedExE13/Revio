@@ -2,6 +2,8 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func
 from fastapi import HTTPException
 from decimal import Decimal
+from sqlalchemy.orm import joinedload
+
 
 from app.models.review import Review
 from app.models.user import User
@@ -35,7 +37,7 @@ def get_reviews(
     search: str | None = None,
     sort: SortOption | None = None,
 ):
-    query = db.query(Review)
+    query = db.query(Review).options(joinedload(Review.user))
     if search:
         query = query.filter(
             Review.title.ilike(f"%{search}%")
@@ -63,10 +65,11 @@ def get_review(
         id: int,
 ):
     review = (
-    db.query(Review)
+    db.query(Review).options(joinedload(Review.user))
     .filter(Review.id == id)
     .first()
 )
+
     if not review:
         raise HTTPException(
             status_code=404,
@@ -139,7 +142,7 @@ def get_my_review(
         current_user: User,
 ):
     reviews = (
-        db.query(Review)
+        db.query(Review).options(joinedload(Review.user))
         .filter(Review.user_id == current_user.id)
         .all()
     )

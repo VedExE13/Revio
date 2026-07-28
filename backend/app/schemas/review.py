@@ -3,6 +3,8 @@ from datetime import datetime
 from enum import Enum
 from decimal import Decimal
 
+from app.schemas.user import UserResponse
+
 class ReviewCreate(BaseModel):
     title: str = Field(min_length = 2,max_length = 255)
     rating: int = Field(
@@ -18,6 +20,9 @@ class ReviewResponse(BaseModel):
     feedback: str
     created_at: datetime
     updated_at: datetime
+
+    user: UserResponse
+
     model_config = ConfigDict(from_attributes=True)
 
 class ReviewUpdate(BaseModel):
