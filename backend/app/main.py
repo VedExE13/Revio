@@ -1,7 +1,6 @@
 from fastapi import FastAPI
 
 from app.api.routes.health import router as health_router
-from app.db.init_db import init_db
 from app.api.routes.auth import router as register_router
 from app.api.routes.users import router as users_router
 from app.api.routes.review import router as reviews_router
@@ -14,9 +13,7 @@ app = FastAPI(
 )
 
 
-@app.on_event("startup")
-def startup():
-    init_db()
+
 
 
 app.include_router(
