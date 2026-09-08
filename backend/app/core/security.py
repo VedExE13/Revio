@@ -63,12 +63,15 @@ def decode_access_token(
 
         return user_id
 
-    except:
+    except HTTPException:
+        raise
+
+    except Exception as e:
+        print("JWT ERROR:", repr(e))
         raise HTTPException(
             status_code=401,
             detail="Invalid or expired token",
         )
-    
 oauth2_scheme = OAuth2PasswordBearer(
     tokenUrl="/api/v1/login",
 )

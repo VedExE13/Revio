@@ -1,6 +1,8 @@
 from jose import jwt
 
 from app.core.config import settings
+from app.models.user import User
+from tests.conftest import TestSessionLocal
 
 
 def test_register_user_success(client):
@@ -208,3 +210,51 @@ def test_login_returns_valid_jwt(client):
 )
         assert payload["sub"] == str(expected_user_id)
         assert "exp" in payload
+
+def test_protected_route_requires_auth(client):
+    response = client.get("/api/v1/me/reviews")
+
+    assert response.status_code == 401
+
+def test_protected_route_with_valid_token(client):
+    user_data = {
+        "name": "Ved",
+        "email": "ved@example.com",
+        "password": "password123",
+    }
+
+    register_response = client.post(
+        "/api/v1/register",
+        json=user_data,
+    )
+    assert register_response.status_code == 201
+
+    login_response = client.post(
+        "/api/v1/login",
+        data={
+            "username": user_data["email"],
+            "password": user_data["password"],
+        },
+    )
+    assert login_response.status_code == 200
+
+    token = login_response.json()["access_token"]
+
+    response = client.get(
+        "/api/v1/me/reviews",
+        headers={
+            "Authorization": f"Bearer {token}",
+        },
+    )
+
+    assert response.status_code == 200
+
+def test_protected_route_with_invalid_token(client):
+    response = client.get(
+        "/api/v1/me/reviews",
+        headers={
+            "Authorization": "Bearer definitely-invalid-token",
+        },
+    )
+
+    assert response.status_code == 401
